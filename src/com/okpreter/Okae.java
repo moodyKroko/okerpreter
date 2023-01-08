@@ -10,6 +10,8 @@ import java.util.Scanner;
 
 public class Okae {
 
+  private static boolean hadError = false;
+
   public static void main(String[] args) throws IOException {
     if (args.length > 1) {
       System.out.println("Usage: Okae [scripts]");
@@ -28,16 +30,23 @@ public class Okae {
     for (; ; ) {
       System.out.println("> ");
       String line = reader.readLine();
+
       if (line == null) {
         break;
       }
+
       run(line);
+      hadError = false;
     }
   }
 
   private static void runFile(String path) throws IOException {
     byte[] bytes = Files.readAllBytes(Paths.get(path));
     run(new String(bytes, Charset.defaultCharset()));
+
+    if (hadError) {
+      System.exit(65);
+    }
   }
 
   private static void run(String source) {
@@ -49,4 +58,14 @@ public class Okae {
     }
   }
 
+  // error handling
+  static void error(int line, String message) {
+    report(line, "", message);
+  }
+
+  private static void report(int line, String where, String message) {
+    String errReport = "[line %d ] Error %s: %s";
+    System.out.printf((errReport) + "%n", line, where, message);
+    hadError = true;
+  }
 }
